@@ -1,0 +1,231 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+body {
+  background: #000;
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  font-family: Verdana, sans-serif;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h1 {
+  color: #fff;
+  font-family: cursive;
+  margin-bottom: 30px;
+  text-align: center;
+  padding-top: 30px;
+}
+
+.controls {
+  margin: 20px 0;
+}
+
+button {
+  background: #65308d;
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  margin: 10px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 18px;
+  font-family: cursive;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background: #7a3da3;
+  transform: scale(1.05);
+}
+
+.taro {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  width: 80%;
+  align-items: center;
+}
+
+.taro-desc {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  background: #16213e;
+  z-index: 1;
+  border-radius: 20px;
+  padding: 50px 30px 30px;
+  margin: -76px 0 0 0;
+  width: 675px;
+  align-items: center;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.8s ease 1.2s forwards;
+}
+
+p {
+  color: #fff;
+  margin: 0;
+  text-align: center;
+  font-size: 20px;
+  font-family: cursive;
+}
+
+.taro-img {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 460px;
+  position: relative;
+}
+
+/* АНИМАЦИИ КАРТ */
+.card-wrapper {
+  position: absolute;
+  width: 220px;
+  height: 380px;
+  transition: transform 0.5s ease;
+}
+
+.card-1 {
+  transform: translateX(0) rotate(0deg) scale(0.8);
+  z-index: 1;
+  opacity: 0;
+  margin-top: 30px;
+  animation: slideOutLeft 0.8s ease 0.4s forwards;
+}
+
+.card-2 {
+  z-index: 3;
+  opacity: 0;
+  transform: scale(0.8);
+  animation: zoomInCenter 0.6s ease 0.2s forwards;
+}
+
+.card-3 {
+  transform: translateX(0) rotate(0deg) scale(0.8);
+  z-index: 1;
+  opacity: 0;
+  margin-top: 30px;
+  animation: slideOutRight 0.8s ease 0.4s forwards;
+}
+
+@keyframes slideOutLeft {
+  0% {
+    transform: translateX(0) rotate(0deg) scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateX(-110px) rotate(-10deg) scale(1);
+    opacity: 0.9;
+  }
+}
+
+@keyframes slideOutRight {
+  0% {
+    transform: translateX(0) rotate(0deg) scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateX(108px) rotate(10deg) scale(1);
+    opacity: 0.9;
+  }
+}
+
+@keyframes zoomInCenter {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.card-image {
+  border-radius: 5px;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.reversed {
+  transform: rotate(180deg);
+}
+
+.card-2 .reversed {
+  transform: rotate(180deg);
+}
+
+.hidden {
+  display: none;
+}
+
+.card-name {
+  text-align: center;
+  color: #ffd700;
+  font-size: 26px;
+  font-weight: bold;
+}
+
+.card-position {
+  text-align: center;
+  color: #c0c0c0;
+  font-size: 16px;
+}
+
+.message {
+  color: #fff;
+  font-family: cursive;
+  font-size: 20px;
+  text-align: center;
+  margin-top: 20px;
+  opacity: 0;
+  animation: fadeIn 0.8s ease 1.2s forwards;
+}
+
+.taroReading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
