@@ -25,67 +25,50 @@ async function loadTarotDeck() {
 function setCookie(name, value, days) {
   const date = new Date();
   date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-  document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
+  document.cookie = `${name}=${encodeURIComponent(value)};expires=${date.toUTCString()};path=/`;
 }
 
 function getCookie(name) {
   const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? match[2] : null;
-}
-
-// === Красивое сообщение вместо alert ===
-function showMessage(text) {
-  let messageBox = document.getElementById("messageBox");
-  if (!messageBox) {
-    messageBox = document.createElement("div");
-    messageBox.id = "messageBox";
-    messageBox.style.position = "fixed";
-    messageBox.style.top = "50%";
-    messageBox.style.left = "50%";
-    messageBox.style.transform = "translate(-50%, -50%)";
-    messageBox.style.background = "rgba(0,0,0,0.85)";
-    messageBox.style.color = "#fff";
-    messageBox.style.padding = "20px 30px";
-    messageBox.style.borderRadius = "10px";
-    messageBox.style.zIndex = "9999";
-    messageBox.style.textAlign = "center";
-    messageBox.style.fontSize = "18px";
-    messageBox.style.maxWidth = "320px";
-    messageBox.style.boxShadow = "0 4px 15px rgba(0,0,0,0.4)";
-    messageBox.style.transition = "opacity 0.3s";
-    document.body.appendChild(messageBox);
-  }
-
-  messageBox.textContent = text;
-  messageBox.style.opacity = "1";
-  messageBox.style.display = "block";
-
-  setTimeout(() => {
-    messageBox.style.opacity = "0";
-    setTimeout(() => (messageBox.style.display = "none"), 300);
-  }, 3000);
+  return match ? decodeURIComponent(match[2]) : null;
 }
 
 // === Основная функция вытягивания карты ===
-function drawCard() {
+function drawCard(forceShow = false) {
   if (tarotDeck.length === 0) {
-    showMessage("Колода еще загружается. Пожалуйста, подождите...");
     return;
   }
 
-  // === Ограничение: 1 раз в день через cookie ===
   const lastDrawDate = getCookie("lastDrawDate");
+  const savedCardData = getCookie("savedCard");
   const today = new Date().toISOString().slice(0, 10);
 
-  if (lastDrawDate === today) {
-    showMessage("Вы уже вытянули карту сегодня 🌙\nПопробуйте завтра!");
-    return;
+  let mainCard, reversed;
+
+  if (lastDrawDate === today && savedCardData && !forceShow) {
+    const saved = JSON.parse(savedCardData);
+    mainCard = tarotDeck.find((card) => card.name === saved.name);
+    reversed = saved.reversed;
+
+    if (!mainCard) {
+      console.error("Ошибка загрузки сохраненной карты 😔");
+      return;
+    }
+
+  } else if (lastDrawDate === today && savedCardData && forceShow) {
+    const saved = JSON.parse(savedCardData);
+    mainCard = tarotDeck.find((card) => card.name === saved.name);
+    reversed = saved.reversed;
+  } else {
+    const randomIndex = Math.floor(Math.random() * tarotDeck.length);
+    reversed = Math.random() > 0.5;
+    mainCard = tarotDeck[randomIndex];
+
+    setCookie("lastDrawDate", today, 1);
+    setCookie("savedCard", JSON.stringify({ name: mainCard.name, reversed }), 1);
   }
 
-  // Сохраняем сегодняшнюю дату в cookie на 1 день
-  setCookie("lastDrawDate", today, 1);
-  // === Конец ограничения ===
-
+  // === Отрисовка карты ===
   const controls = document.getElementById("controls");
   const taroReading = document.getElementById("taroReading");
   const taroImages = document.getElementById("taroImages");
@@ -101,12 +84,6 @@ function drawCard() {
   taroImages.innerHTML = "";
   taroDescription.innerHTML = "";
 
-  const randomIndex = Math.floor(Math.random() * tarotDeck.length);
-  const isReversed = Math.random() > 0.5;
-  const mainCard = tarotDeck[randomIndex];
-  const reversed = isReversed;
-
-  // === Отображаем 3 карты (центральная — основная) ===
   for (let i = 0; i < 3; i++) {
     const cardWrapper = document.createElement("div");
     cardWrapper.className = `card-wrapper card-${i + 1}`;
@@ -133,7 +110,9 @@ function drawCard() {
   const cardMeaning = reversed ? mainCard.reversed : mainCard.upright;
 
   const descriptionHTML = `
-    <div class="card-name">${mainCard.name} ${reversed ? "(Перевернутая)" : "(Прямая)"}</div>
+    <div class="card-name">${mainCard.name} ${
+    reversed ? "(Перевернутая)" : "(Прямая)"
+  }</div>
     <div class="card-position">${cardMeaning}</div>
     <p>${cardDescription}</p>
   `;
@@ -141,14 +120,30 @@ function drawCard() {
   taroDescription.innerHTML = descriptionHTML;
 }
 
-// === Запуск при загрузке страницы ===
-document.addEventListener("DOMContentLoaded", function () {
-  loadTarotDeck();
+document.addEventListener("DOMContentLoaded", async function () {
+  const controls = document.getElementById("controls");
+  const taroReading = document.getElementById("taroReading");
+
+  if (controls) controls.classList.add("hidden");
+  if (taroReading) taroReading.classList.add("hidden");
+
+  await loadTarotDeck();
 
   const drawButton = document.getElementById("drawButton");
   if (drawButton) {
     drawButton.addEventListener("click", drawCard);
   } else {
     console.error("Кнопка не найдена!");
+  }
+
+  // === Проверяем, есть ли карта за сегодня ===
+  const lastDrawDate = getCookie("lastDrawDate");
+  const today = new Date().toISOString().slice(0, 10);
+  const savedCardData = getCookie("savedCard");
+
+  if (lastDrawDate === today && savedCardData) {
+    drawCard(true);
+  } else {
+    if (controls) controls.classList.remove("hidden");
   }
 });
